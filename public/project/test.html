@@ -7,7 +7,7 @@
 
 </head>
 <body>
-<!-- partial:index.partial.html -->
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,25 +19,26 @@
   <div class="main">  	
     <input type="checkbox" id="chk" aria-hidden="true">
 
-      <div class="signup">
-        <form>
+      <div class="signup" >
+        <form onsbumit="return false">
           <label for="chk" aria-hidden="true">Sign up</label>
-          <input type="text" name="txt" placeholder="User name" required="">
-          <input type="email" name="email" placeholder="Email" required="">
-          <input type="password" name="pswd" placeholder="Password" required="">
-          <button>Sign up</button>
+          <input type="text" id="txtSign" placeholder="User name" required>
+          <input type="email" id="emailSign" placeholder="Email" required>
+          <input type="password" id="pswdSign" placeholder="Password" required>
+          <button type="submit" id="signBtn">Sign up</button>
         </form>
       </div>
 
       <div class="login">
-        <form>
+        <form onsbumit="return false">
           <label for="chk" aria-hidden="true">Login</label>
-          <input type="email" name="email" placeholder="Email" required="">
-          <input type="password" name="pswd" placeholder="Password" required="">
-          <button>Login</button>
+          <input type="text" id="txtLogin" placeholder="User name" required>
+          <input type="password" id="pswdLogin" placeholder="Password" required>
+          <button type="submit" id="loginBtn">Login</button>
         </form>
       </div>
   </div>
+  <script src="/public/project/test.js"></script>
 </body>
 </html>
 <!-- partial -->

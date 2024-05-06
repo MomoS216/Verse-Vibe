@@ -262,6 +262,24 @@ const selectMieiProgettiSolo = (nomeUtente) => {
 };
 
 //SERVIZI
+app.post("/register", (req, res) => {
+  if (!req.body.username || !req.body.password || !req.body.email) {
+    return res
+      .status(400)
+      .json({ error: "Nome, password ed email sono richiesti" });
+  }
+  let username = req.body.username;
+  let password = req.body.password;
+  let email = req.body.email;
+  insertUtente(username, password, email)
+    .then(() => {
+      res.json({ message: "Utente inserito correttamente" });
+    })
+    .catch((error) => {
+      res.status(500).json({ error: error.message });
+    });
+});
+
 app.get("/allUsers", (req, res) => {
   selectAllUtenti()
     .then((result) => {
@@ -370,24 +388,6 @@ app.post("/testiProgetto", (req, res) => {
       } else {
         res.json({ result: result });
       }
-    })
-    .catch((error) => {
-      res.status(500).json({ error: error.message });
-    });
-});
-
-app.post("/register", (req, res) => {
-  if (!req.body.username || !req.body.password || !req.body.email) {
-    return res
-      .status(400)
-      .json({ error: "Nome, password ed email sono richiesti" });
-  }
-  let username = req.body.username;
-  let password = req.body.password;
-  let email = req.body.email;
-  insertUtente(username, password, email)
-    .then(() => {
-      res.json({ message: "Utente inserito correttamente" });
     })
     .catch((error) => {
       res.status(500).json({ error: error.message });
