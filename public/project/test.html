@@ -1,120 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Registration Test</title>
+  <title>CodePen - Sign up / Login Form</title>
+  <link rel="stylesheet" href="./access.css">
+
 </head>
 <body>
-  <h1>Test</h1>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Slide Navbar</title>
+  <link rel="stylesheet" type="text/css" href="slide navbar style.css">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="main">  	
+    <input type="checkbox" id="chk" aria-hidden="true">
 
-  <form id="registerForm">
-    <input type="text" name="username" placeholder="Username" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <input type="email" name="email" placeholder="Email" required>
-    <button type="submit">Register</button>
-  </form>
+      <div class="signup">
+        <form>
+          <label for="chk" aria-hidden="true">Sign up</label>
+          <input type="text" name="txt" placeholder="User name" required="">
+          <input type="email" name="email" placeholder="Email" required="">
+          <input type="password" name="pswd" placeholder="Password" required="">
+          <button>Sign up</button>
+        </form>
+      </div>
 
-  <form id="loginForm">
-    <input type="text" name="username" placeholder="Username" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <button type="submit">Login</button>
-  </form>
-
-  <form id="soloProjectsForm">
-    <input type="text" name="username" placeholder="Username" required>
-    <button type="submit">Fetch Solo Projects</button>
-  </form>
-
-  <form id="featProjectsForm">
-    <input type="text" name="username" placeholder="Username" required>
-    <button type="submit">Fetch Feat Projects</button>
-  </form>
-
-  <form id="chatForm">
-    <input type="text" name="idProgetto" placeholder="Project ID" required>
-    <button type="submit">Fetch Chat</button>
-  </form>
-
-  <form id="textForm">
-    <input type="text" name="idProgetto" placeholder="Project ID" required>
-    <button type="submit">Fetch Project Texts</button>
-  </form>
-
-  <!-- Aggiungi le form e i test per gli altri servizi qui -->
-
-  <div id="registrationResult"></div>
-
-  <script>//è solo per provare i serviziiiiii
-    document.getElementById('registerForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const formData = new FormData(this);
-      const data = Object.fromEntries(formData.entries());
-      testService("/register", data);
-    });
-
-    document.getElementById('loginForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const formData = new FormData(this);
-      const data = Object.fromEntries(formData.entries());
-      testService("/login", data);
-    });
-
-    document.getElementById('soloProjectsForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const formData = new FormData(this);
-      const data = Object.fromEntries(formData.entries());
-      testService("/soloProgects", data);
-    });
-
-    document.getElementById('featProjectsForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const formData = new FormData(this);
-      const data = Object.fromEntries(formData.entries());
-      testService("/featProgects", data);
-    });
-
-    document.getElementById('chatForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const formData = new FormData(this);
-      const data = Object.fromEntries(formData.entries());
-      testService("/chat", data);
-    });
-
-    document.getElementById('textForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const formData = new FormData(this);
-      const data = Object.fromEntries(formData.entries());
-      testService("/testiProgetto", data);
-    });
-
-    // Aggiungi qui le funzioni per gestire gli altri servizi
-
-    function testService(url, data) {
-      const load = () => {
-        return new Promise((resolve, reject) => {
-          fetch(url, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(data)
-          })
-            .then((response) => response.json())
-            .then((json) => {
-              resolve(json);
-            });
-        });
-      };
-
-      load().then((result)=>{
-        console.log(result);
-        const registrationResult = document.getElementById('registrationResult');
-        registrationResult.innerHTML = JSON.stringify(result);
-      });
-    }
-  </script>
+      <div class="login">
+        <form>
+          <label for="chk" aria-hidden="true">Login</label>
+          <input type="email" name="email" placeholder="Email" required="">
+          <input type="password" name="pswd" placeholder="Password" required="">
+          <button>Login</button>
+        </form>
+      </div>
+  </div>
 </body>
 </html>
+<!-- partial -->
 
-
+</body>
+</html>
