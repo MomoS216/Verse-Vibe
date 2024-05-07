@@ -23,6 +23,8 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "/public/project/index.html"));
 });
 
+
+
 const leggiFile = (path) => {
   return new Promise((resolve, reject) => {
     fs.readFile(path, "utf8", (err, data) => {
@@ -51,7 +53,7 @@ const executeQuery = (sql) => {
 const queries = [
   `CREATE TABLE IF NOT EXISTS utente(
     nome VARCHAR(15) PRIMARY KEY,
-    password VARCHAR(15) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     email VARCHAR(50) NOT NULL
   );`,
   `CREATE TABLE IF NOT EXISTS progetto(
@@ -262,23 +264,61 @@ const selectMieiProgettiSolo = (nomeUtente) => {
 };
 
 //SERVIZI
-app.post("/register", (req, res) => {
+const bcrypt = require('bcrypt');
+
+app.post("/registrazione", (req, res) => {
   if (!req.body.username || !req.body.password || !req.body.email) {
-    return res
-      .status(400)
-      .json({ error: "Nome, password ed email sono richiesti" });
+    return res.status(400).json({ error: "Nome, password ed email sono richiesti" });
+  }
+  let username = req.body.username;
+  let email = req.body.email;
+  // Hash della password
+  bcrypt.hash(req.body.password, 10, (err, hash) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    // Salva l'utente con la password hashata
+    insertUtente(username, hash, email)
+      .then(() => {
+        res.json({ message: "Utente inserito correttamente" });
+      })
+      .catch((error) => {
+        res.status(500).json({ error: error.message });
+      });
+  });
+});
+
+app.post("/login", (req, res) => {
+  if (!req.body.username || !req.body.password) {
+    return res.status(400).json({ error: "Username e password sono richiesti" });
   }
   let username = req.body.username;
   let password = req.body.password;
-  let email = req.body.email;
-  insertUtente(username, password, email)
-    .then(() => {
-      res.json({ message: "Utente inserito correttamente" });
+  // Seleziona l'utente dal database
+  selectUtenteLogin(username)
+    .then((result) => {
+      if (!result) {
+        return res.status(404).json({ error: "Utente non trovato" });
+      }
+      // Confronta la password hashata con quella fornita dall'utente
+      bcrypt.compare(password, result[0].password, (err, match) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        if (match) {
+          res.json({ result: true });
+        } else {
+          res.json({ result: false });
+        }
+      });
     })
     .catch((error) => {
       res.status(500).json({ error: error.message });
     });
 });
+
+
+
 
 app.get("/allUsers", (req, res) => {
   selectAllUtenti()
@@ -290,29 +330,6 @@ app.get("/allUsers", (req, res) => {
     });
 });
 
-app.post("/login", (req, res) => {
-  if (!req.body.username || !req.body.password) {
-    return res
-      .status(400)
-      .json({ error: "Username e password sono richiesti" });
-  }
-  let username = req.body.username;
-  let password = req.body.password;
-  console.log(password);
-  selectUtenteLogin(username)
-    .then((result) => {
-      if (!result) {
-        return res.status(404).json({ error: "Utente non trovato" });
-      } else if (password == result[0].password) {
-        res.json({ result: true });
-      } else {
-        res.json({ result: false });
-      }
-    })
-    .catch((error) => {
-      res.status(500).json({ error: error.message });
-    });
-});
 
 app.post("/soloProgects", (req, res) => {
   if (!req.body.username) {
@@ -557,6 +574,6 @@ app.delete("/text/:id", (req, res) => {
 });
 
 const server = http.createServer(app);
-server.listen(80, () => {
+server.listen(5100, () => {
   console.log("- server running");
 });
