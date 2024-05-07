@@ -57,7 +57,9 @@ document.getElementById('signupForm').addEventListener('submit', function(event)
         </div>
       `;
       if (data.result) {
+        sessionStorage.setItem('loggato', {user: username, log: true }) 
         window.location.href = "./home.html";
+        console.log(data.userData);
       }
     })
     .catch(error => {

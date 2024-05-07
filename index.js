@@ -306,7 +306,9 @@ app.post("/login", (req, res) => {
           return res.status(500).json({ error: err.message });
         }
         if (match) {
-          res.json({ result: true });
+          res.json({ result: true,
+            userData : result[0]
+           });
         } else {
           res.json({ result: false });
         }
