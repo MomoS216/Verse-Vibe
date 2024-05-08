@@ -57,8 +57,11 @@ document.getElementById('signupForm').addEventListener('submit', function(event)
         </div>
       `;
       if (data.result) {
-        sessionStorage.setItem('loggato', {user: username, log: true }) 
+        let dati={user: username, log: true };
+        sessionStorage.setItem("loggato", JSON.stringify(dati));
         window.location.href = "./home.html";
+        username="";
+        password="";
         console.log(data.userData);
       }
     })
