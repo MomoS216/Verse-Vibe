@@ -54,8 +54,8 @@ const queries = [
   `CREATE TABLE IF NOT EXISTS utente(
     nome VARCHAR(15) PRIMARY KEY,
     password VARCHAR(255) NOT NULL,
-    email VARCHAR(50) NOT NULL
-  );`,
+    email VARCHAR(50) NOT NULL UNIQUE
+);`,
   `CREATE TABLE IF NOT EXISTS progetto(
     id INT AUTO_INCREMENT PRIMARY KEY,
     data DATE NOT NULL,
@@ -275,7 +275,7 @@ app.post("/registrazione", (req, res) => {
   // Hash della password
   bcrypt.hash(req.body.password, 10, (err, hash) => {
     if (err) {
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({err});
     }
     // Salva l'utente con la password hashata
     insertUtente(username, hash, email)
@@ -283,7 +283,7 @@ app.post("/registrazione", (req, res) => {
         res.json({ message: "Utente inserito correttamente" });
       })
       .catch((error) => {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error });
       });
   });
 });
