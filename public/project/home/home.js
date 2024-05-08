@@ -1,4 +1,4 @@
-
+sessionStorage.setItem("idProgetto", -1);
 const divFeat=document.getElementById("feat");
 const divSolo=document.getElementById("solo");
 
@@ -83,7 +83,7 @@ if (username.log) {
           const id = button.id;
           console.log('Hai cliccato sul pulsante con ID del progetto:', id);
           sessionStorage.setItem("idProgetto", id);
-          window.location.href = "./progetto.html";
+          window.location.href = "../progetto/progetto.html";
         };
       });
     }else{
@@ -106,7 +106,7 @@ if (username.log) {
           const id = button.id;
           console.log('Hai cliccato sul pulsante con ID del progetto:', id);
           sessionStorage.setItem("idProgetto", id);
-          window.location.href = "./progetto.html";
+          window.location.href = "../progetto/progetto.html";
         };
       });
 
@@ -118,13 +118,6 @@ if (username.log) {
         divFeat.innerHTML="Errore durante il recupero dei progetti feat:  "+ error;
     });
   
-   
-      let pulsantiProgetto = document.querySelectorAll('.progetto');
-      pulsantiProgetto.forEach((button, index) => {
-        button.onclick = () => {
-          const id = button.id;
-          console.log('Hai cliccato sul pulsante con ID del progetto:', id);
-        };
-      });
+
 
 }

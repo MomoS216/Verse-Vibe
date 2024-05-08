@@ -59,7 +59,7 @@ document.getElementById('signupForm').addEventListener('submit', function(event)
       if (data.result) {
         let dati={user: username, log: true };
         sessionStorage.setItem("loggato", JSON.stringify(dati));
-        window.location.href = "./home.html";
+        window.location.href = "../home/home.html";
         username="";
         password="";
         console.log(data.userData);

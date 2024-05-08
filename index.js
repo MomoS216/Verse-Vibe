@@ -263,6 +263,15 @@ const selectMieiProgettiSolo = (nomeUtente) => {
   return executeQuery(sql);
 };
 
+const selectProgetto = (id) => {
+  const sql = `
+    SELECT *
+    FROM progetto
+    WHERE id = '${id}';
+  `;
+  return executeQuery(sql);
+};
+
 //SERVIZI
 const bcrypt = require('bcrypt');
 
@@ -326,6 +335,18 @@ app.get("/allUsers", (req, res) => {
   selectAllUtenti()
     .then((result) => {
       res.json({ Users: result });
+    })
+    .catch((error) => {
+      res.status(500).json({ error: error.message });
+    });
+});
+
+
+app.post("/progetto", (req, res) => {
+  console.log("id progetto"+req.body.id);
+  selectProgetto(req.body.id)
+    .then((result) => {
+      res.json({ progetto: result });
     })
     .catch((error) => {
       res.status(500).json({ error: error.message });
