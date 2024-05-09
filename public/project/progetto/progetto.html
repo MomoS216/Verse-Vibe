@@ -29,7 +29,7 @@
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="#">
-        <img src="../logoP.png" width="70" height="60" class="d-inline-block align-top" alt="Logo">
+        <img src="../../assets/logoP.png" width="70" height="60" class="d-inline-block align-top" alt="Logo">
         <span id="username" style="display: inline-block; text-align: center; width: 100%;"></span>
 
     </a>
@@ -44,7 +44,7 @@
   const button=document.getElementById("esci");
 
   button.onclick=()=>{
-    window.location.href = './home.html';
+    window.location.href = '../home/home.html';
   }
  
   const username = JSON.parse(sessionStorage.getItem('loggato'));
