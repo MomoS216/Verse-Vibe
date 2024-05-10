@@ -121,6 +121,7 @@ const insertProgetto = (data, nome, tipo, nomeArtista) => {
   const sql = `
     INSERT INTO progetto (data, nome, tipo, nomeArtista) VALUES ('${data}', '${nome}', ${tipo}, '${nomeArtista}')
   `;
+  console.log(sql);
   return executeQuery(sql);
 };
 
@@ -381,6 +382,7 @@ app.post("/featProgects", (req, res) => {
 
   selectProgettiFeat(username)
     .then((result) => {
+      console.log(result);
       if (!result) {
         return res.status(404).json({ error: "Ancora nessun progetto feat" });
       } else {

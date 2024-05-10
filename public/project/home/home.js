@@ -2,9 +2,16 @@ sessionStorage.setItem("idProgetto", -1);
 const divFeat=document.getElementById("feat");
 const divSolo=document.getElementById("solo");
 
+const divModal=document.getElementById("divModal");
+const divModalSolo=document.getElementById("divModalSolo");
+const divModalFeat=document.getElementById("divModalFeat");
 
+const btnModalSolo=document.getElementById("CreateProjectSolo");
+const btnModalFeat=document.getElementById("CreateProjectFeat");
+const inputTitleSolo=document.getElementById("nameProjectSolo");
+const inputTitleFeat=document.getElementById("nameProjectFeat");
+const inputArtistFeat=document.getElementById("nameArtist");
 
-// Funzione per ottenere i progetti personali dell'artista
 const fetchSoloProjects = (username) => {
     return new Promise((resolve, reject) => {
       fetch('/soloProgects', {
@@ -29,7 +36,6 @@ const fetchSoloProjects = (username) => {
     });
   };
   
-  // Funzione per ottenere i progetti feat dell'artista
   const fetchFeatProjects = (username) => {
     return new Promise((resolve, reject) => {
       fetch('/featProgects', {
@@ -53,8 +59,38 @@ const fetchSoloProjects = (username) => {
       });
     });
   };
-  
 
+  function newProject(data1, nome1, tipo1, nomeArtista1) {
+    return new Promise((resolve, reject) => {
+        fetch('/newProgect', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                data: data1,
+                nome: nome1,
+                tipo: tipo1,
+                nomeArtista: nomeArtista1
+            })
+        })
+        .then(response => {
+          console.log(response);
+            if (!response.ok) {
+                throw new Error('Errore durante la richiesta al server');
+            }
+            return response.json();
+        })
+        .then(data => {
+            resolve(data);
+        })
+        .catch(error => {
+            reject(error);
+        });
+    });
+}
+
+  
   const render = (array) => {
     let template = "";
     array.forEach((item, index) => {
@@ -70,7 +106,28 @@ const fetchSoloProjects = (username) => {
 
 
 
+
+
+
 if (username.log) {
+
+  btnModalSolo.onclick = () => {
+    const oggi = new Date();
+const anno = oggi.getFullYear();
+const mese = String(oggi.getMonth() + 1).padStart(2, '0'); // +1 perché i mesi sono zero-based
+const giorno = String(oggi.getDate()).padStart(2, '0');
+
+const dataAttuale = `${anno}-${mese}-${giorno}`;
+console.log(dataAttuale);
+    newProject(dataAttuale, inputTitleSolo.value, 0, username.user)
+        .then((result) => {
+            alert(result.message); // Utilizza alert() per visualizzare il messaggio
+        })
+        .catch((error) => {
+            alert(error);
+        });
+}
+
     
   fetchSoloProjects(username.user)
     .then((result) => {
@@ -118,6 +175,9 @@ if (username.log) {
         divFeat.innerHTML="Errore durante il recupero dei progetti feat:  "+ error;
     });
   
+
+
+
 
 
 }
