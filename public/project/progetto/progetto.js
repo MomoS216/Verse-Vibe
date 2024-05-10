@@ -1,7 +1,9 @@
 const idProgetto = sessionStorage.getItem("idProgetto");
+
+
 const selectProgetto = (data) => {
     return new Promise((resolve, reject) => {
-      fetch("/progetto", {
+      fetch("/progettoById", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,6 +35,10 @@ document.getElementById('username').innerHTML = nomeProgetto;
 .catch((error) => {
     console.log("nessun progetto  "+ error);
 });
+
+
+
+
 
 
 

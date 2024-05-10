@@ -62,7 +62,7 @@ const fetchSoloProjects = (username) => {
 
   function newProject(data1, nome1, tipo1, nomeArtista1) {
     return new Promise((resolve, reject) => {
-        fetch('/newProgect', {
+        fetch('/nuovoProgetto', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -90,6 +90,59 @@ const fetchSoloProjects = (username) => {
     });
 }
 
+function insertPartecipazione(nomeArtista, idProgetto) {
+  return new Promise((resolve, reject) => {
+    fetch('/collaborazioni', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        nomeArtista: nomeArtista,
+        idProgetto: idProgetto
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Errore durante la richiesta al server');
+      }
+      return response.json();
+    })
+    .then(data => {
+      resolve(data);
+    })
+    .catch(error => {
+      reject(error);
+    });
+  });
+}
+
+function selectProgetto(nome1) {
+  return new Promise((resolve, reject) => {
+    fetch('/progettoByName', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        nome: nome1
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Errore durante la richiesta al server');
+      }
+      return response.json();
+    })
+    .then(data => {
+      resolve(data);
+    })
+    .catch(error => {
+      reject(error);
+    });
+  });
+}
+
   
   const render = (array) => {
     let template = "";
@@ -112,20 +165,42 @@ const fetchSoloProjects = (username) => {
 if (username.log) {
 
   btnModalSolo.onclick = () => {
-    const oggi = new Date();
-const anno = oggi.getFullYear();
-const mese = String(oggi.getMonth() + 1).padStart(2, '0'); // +1 perché i mesi sono zero-based
-const giorno = String(oggi.getDate()).padStart(2, '0');
+    const currentDate = new Date();
 
-const dataAttuale = `${anno}-${mese}-${giorno}`;
-console.log(dataAttuale);
-    newProject(dataAttuale, inputTitleSolo.value, 0, username.user)
+    const formattedDate = currentDate.toISOString().split('T')[0];
+    
+console.log(formattedDate);
+    newProject(formattedDate, inputTitleSolo.value, 0, username.user)
         .then((result) => {
-            alert(result.message); // Utilizza alert() per visualizzare il messaggio
+            alert(result.message); 
         })
         .catch((error) => {
             alert(error);
         });
+}
+
+
+btnModalFeat.onclick = () => {
+  const currentDate = new Date();
+  const formattedDate = currentDate.toISOString().split('T')[0];
+console.log(formattedDate);
+  newProject(formattedDate, inputTitleFeat.value, 0, username.user)
+      .then((result) => {
+        selectProgetto(inputTitleFeat.value).then((result) => {  
+insertPartecipazione(inputArtistFeat.value,result.progetto.id).then((result) => {  
+  alert(result.message);
+          })
+          .catch((error) => {
+              alert(error);
+          });
+        })
+        .catch((error) => {
+            alert(error);
+        }); 
+      })
+      .catch((error) => {
+          alert(error);
+      });
 }
 
     

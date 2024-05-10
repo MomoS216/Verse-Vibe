@@ -264,7 +264,16 @@ const selectMieiProgettiSolo = (nomeUtente) => {
   return executeQuery(sql);
 };
 
-const selectProgetto = (id) => {
+const selectProgettoName = (nome) => {
+  const sql = `
+    SELECT *
+    FROM progetto
+    WHERE nome = '${nome}';
+  `;
+  return executeQuery(sql);
+};
+
+const selectProgettoId = (id) => {
   const sql = `
     SELECT *
     FROM progetto
@@ -343,9 +352,20 @@ app.get("/allUsers", (req, res) => {
 });
 
 
-app.post("/progetto", (req, res) => {
-  console.log("id progetto"+req.body.id);
-  selectProgetto(req.body.id)
+app.post("/progettoByName", (req, res) => {
+  console.log("progetto"+req.body.nome);
+  selectProgettoName(req.body.nome)
+    .then((result) => {
+      res.json({ progetto: result });
+    })
+    .catch((error) => {
+      res.status(500).json({ error: error.message });
+    });
+});
+
+app.post("/progettoById", (req, res) => {
+  console.log("progetto"+req.body.id);
+  selectProgettoId(req.body.id)
     .then((result) => {
       res.json({ progetto: result });
     })
@@ -436,7 +456,7 @@ app.post("/testiProgetto", (req, res) => {
     });
 });
 
-app.post("/newProgect", (req, res) => {
+app.post("/nuovoProgetto", (req, res) => {
   if (
     !req.body.data ||
     !req.body.nome ||
