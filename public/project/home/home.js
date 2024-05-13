@@ -43,7 +43,7 @@ const fetchSoloProjects = (username) => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ username })
+        body: JSON.stringify({ username: username })
       })
       .then(response => {
         if (!response.ok) {
@@ -60,64 +60,36 @@ const fetchSoloProjects = (username) => {
     });
   };
 
-  function newProject(data1, nome1, tipo1, nomeArtista1) {
+
+  function insertPartecipazioneFetch(nomeArtista, idProgetto) {
     return new Promise((resolve, reject) => {
-        fetch('/nuovoProgetto', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                data: data1,
-                nome: nome1,
-                tipo: tipo1,
-                nomeArtista: nomeArtista1
-            })
+      fetch('/collaborazioni', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          nomeArtista: nomeArtista,
+          idProgetto: idProgetto
         })
-        .then(response => {
-          console.log(response);
-            if (!response.ok) {
-                throw new Error('Errore durante la richiesta al server');
-            }
-            return response.json();
-        })
-        .then(data => {
-            resolve(data);
-        })
-        .catch(error => {
-            reject(error);
-        });
-    });
-}
-
-function insertPartecipazione(nomeArtista, idProgetto) {
-  return new Promise((resolve, reject) => {
-    fetch('/collaborazioni', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        nomeArtista: nomeArtista,
-        idProgetto: idProgetto
       })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Errore durante la richiesta al server');
-      }
-      return response.json();
-    })
-    .then(data => {
-      resolve(data);
-    })
-    .catch(error => {
-      reject(error);
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Errore durante la richiesta al server');
+        }
+        return response.json();
+      })
+      .then(data => {
+        resolve(data);
+      })
+      .catch(error => {
+        reject(error);
+      });
     });
-  });
-}
+  }
+  
 
-function selectProgetto(nome1) {
+function selectProgetto(nome1,user) {
   return new Promise((resolve, reject) => {
     fetch('/progettoByName', {
       method: 'POST',
@@ -125,7 +97,8 @@ function selectProgetto(nome1) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        nome: nome1
+        nome: nome1,
+        username:user
       })
     })
     .then(response => {
@@ -159,6 +132,23 @@ function selectProgetto(nome1) {
 
 
 
+  function provaProgetto(data,nome,tipo,nomeArtista){
+    return new Promise((resolve, reject) => {
+      fetch('/prova1', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({data: data, nome:nome, tipo:tipo,nomeArtista:nomeArtista}),
+      })
+      .then(response => console.log(JSON.stringify(response)))
+  });
+  }
+
+
+
+  
+
 
 
 
@@ -170,37 +160,47 @@ if (username.log) {
     const formattedDate = currentDate.toISOString().split('T')[0];
     
 console.log(formattedDate);
-    newProject(formattedDate, inputTitleSolo.value, 0, username.user)
+console.log(username);
+    provaProgetto(formattedDate, inputTitleSolo.value, 0, username.user)
         .then((result) => {
             alert(result.message); 
+            console.log(result.message);
         })
         .catch((error) => {
             alert(error);
         });
 }
 
+let dato;
 
 btnModalFeat.onclick = () => {
   const currentDate = new Date();
   const formattedDate = currentDate.toISOString().split('T')[0];
 console.log(formattedDate);
-  newProject(formattedDate, inputTitleFeat.value, 0, username.user)
-      .then((result) => {
-        selectProgetto(inputTitleFeat.value).then((result) => {  
-insertPartecipazione(inputArtistFeat.value,result.progetto.id).then((result) => {  
-  alert(result.message);
-          })
-          .catch((error) => {
-              alert(error);
-          });
-        })
-        .catch((error) => {
-            alert(error);
-        }); 
+let titolo = inputTitleFeat.value;
+let artista = inputArtistFeat.value;
+  provaProgetto(formattedDate, titolo, 1, username.user)
+      .then((result) => { 
       })
       .catch((error) => {
           alert(error);
       });
+
+      selectProgetto(titolo, username.user)
+      .then((result) => {  
+        console.log("select ", result);
+        dato = result.progetto;
+      })
+      .catch((error) => {
+        alert(error);
+      });
+
+      insertPartecipazione(artista,dato.progetto.id).then((result) => {  
+        alert(result.message);
+                })
+                .catch((error) => {
+                    alert(error);
+                });
 }
 
     
@@ -208,6 +208,7 @@ insertPartecipazione(inputArtistFeat.value,result.progetto.id).then((result) => 
     .then((result) => {
         if(result.result.length!=0){
         //divSolo.innerHTML=JSON.stringify(result);
+        console.log(result.result);
         divSolo.innerHTML=render(result.result);
         let pulsantiProgetto = document.querySelectorAll('.progetto');
       pulsantiProgetto.forEach((button, index) => {
@@ -229,6 +230,7 @@ insertPartecipazione(inputArtistFeat.value,result.progetto.id).then((result) => 
   fetchFeatProjects(username.user)
     .then((result) => {
         if(result.result.length!=0){
+          console.log(result.result);
             //divFeat.innerHTML=JSON.stringify(result);
             divFeat.innerHTML=render(result.result);
 

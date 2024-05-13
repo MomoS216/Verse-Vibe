@@ -4,7 +4,7 @@ const path = require("path");
 const app = express();
 const fs = require("fs");
 const mysql = require("mysql2");
-const { error } = require("console");
+const { error, Console } = require("console");
 const conf = require("./conf.js");
 console.log(conf);
 const connection = mysql.createConnection(conf);
@@ -22,6 +22,8 @@ app.use("/", express.static(path.join(__dirname, "public")));
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "/public/project/index.html"));
 });
+
+
 
 
 
@@ -49,6 +51,13 @@ const executeQuery = (sql) => {
     });
   });
 };
+
+
+
+
+
+
+
 
 const queries = [
   `CREATE TABLE IF NOT EXISTS utente(
@@ -128,8 +137,9 @@ const insertProgetto = (data, nome, tipo, nomeArtista) => {
 const insertTesto = (contenuto, idProgetto, nomeArtista) => {
   const sql = `
     INSERT INTO testo (contenuto, idProgetto, nomeArtista) 
-    VALUES ('${contenuto}', ${idProgetto}, '${nomeArtista}');
+    VALUES ('${contenuto}', '${idProgetto}', '${nomeArtista}');
   `;
+  console.log(sql);
   return executeQuery(sql);
 };
 
@@ -137,6 +147,7 @@ const insertPartecipazione = (nomeArtista, idProgetto) => {
   const sql = `
         INSERT INTO partecipa (nomeArtista, idProgetto) VALUES ('${nomeArtista}', ${idProgetto})
     `;
+    console.log(sql);
   return executeQuery(sql);
 };
 
@@ -236,24 +247,16 @@ const selectAllUtenti = () => {
 
 const selectProgettiFeat = (nomeUtente) => {
   const sql = `
-    SELECT p.*
+    SELECT DISTINCT p.*
     FROM progetto p
-    WHERE (p.id IN (
-            SELECT idProgetto
-            FROM partecipa
-            WHERE nomeArtista = '${nomeUtente}'
-          )
-          AND p.nomeArtista = '${nomeUtente}'
-          OR p.id IN (
-            SELECT idProgetto
-            FROM partecipa
-            WHERE idProgetto = p.id
-            AND nomeArtista != '${nomeUtente}'
-          ))
-          AND p.tipo = 1;
+    JOIN partecipa pa ON p.id = pa.idProgetto
+    WHERE (p.tipo = 1
+          AND (p.nomeArtista = '${nomeUtente}'
+          OR pa.nomeArtista = '${nomeUtente}'));
   `;
   return executeQuery(sql);
 };
+
 
 const selectMieiProgettiSolo = (nomeUtente) => {
   const sql = `
@@ -264,14 +267,14 @@ const selectMieiProgettiSolo = (nomeUtente) => {
   return executeQuery(sql);
 };
 
-const selectProgettoName = (nome) => {
+const selectProgettoName = (nome, user) => {
   const sql = `
     SELECT *
     FROM progetto
-    WHERE nome = '${nome}';
+    WHERE nome = '${nome}' AND nomeArtista='${user}';
   `;
   return executeQuery(sql);
-};
+};  
 
 const selectProgettoId = (id) => {
   const sql = `
@@ -354,7 +357,7 @@ app.get("/allUsers", (req, res) => {
 
 app.post("/progettoByName", (req, res) => {
   console.log("progetto"+req.body.nome);
-  selectProgettoName(req.body.nome)
+  selectProgettoName(req.body.nome,req.body.username)
     .then((result) => {
       res.json({ progetto: result });
     })
@@ -380,12 +383,13 @@ app.post("/soloProgects", (req, res) => {
     return res.status(400).json({ error: "Nome Artista richiesto" });
   }
   let username = req.body.username;
-
+  console.log("usernameSolo"+username);
   selectMieiProgettiSolo(username)
     .then((result) => {
       if (!result) {
         return res.status(404).json({ error: "Ancora nessun progetto solo" });
       } else {
+        console.log(result);
         res.json({ result: result });
       }
     })
@@ -399,7 +403,7 @@ app.post("/featProgects", (req, res) => {
     return res.status(400).json({ error: "Nome Artista richiesto" });
   }
   let username = req.body.username;
-
+console.log("usernameFeat"+username);
   selectProgettiFeat(username)
     .then((result) => {
       console.log(result);
@@ -456,26 +460,42 @@ app.post("/testiProgetto", (req, res) => {
     });
 });
 
-app.post("/nuovoProgetto", (req, res) => {
-  if (
-    !req.body.data ||
-    !req.body.nome ||
-    !req.body.tipo ||
-    !req.body.nomeArtista
-  ) {
-    return res
-      .status(400)
-      .json({ error: "Data, nome, tipo e nome dell'artista sono richiesti" });
-  }
-  const { data, nome, tipo, nomeArtista } = req.body;
+
+
+app.post("/prova",(req,res)=>{
+ 
+  const data = req.body.data;
+  const nome = req.body.nome;
+  const tipo = req.body.tipo;
+  const nomeArtista = req.body.nomeArtista;
+  
   insertProgetto(data, nome, tipo, nomeArtista)
     .then(() => {
       res.json({ message: "Progetto inserito correttamente" });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      console.error("Errore durante l'inserimento del progetto:", error);
+      res.status(500).json({ error: "Si è verificato un errore durante l'inserimento del progetto." });
     });
 });
+
+
+app.post("/prova1",(req,res)=>{
+  const data = req.body.data;
+  const nome = req.body.nome;
+  const tipo = req.body.tipo;
+  const nomeArtista = req.body.nomeArtista;
+  
+  insertProgetto(data, nome, tipo, nomeArtista)
+    .then(() => {
+      res.json({ message: "Progetto inserito correttamente" });
+    })
+    .catch((error) => {
+      console.error("Errore durante l'inserimento del progetto:", error);
+      res.status(500).json({ error: "Si è verificato un errore durante l'inserimento del progetto." });
+    });
+})
+
 
 app.post("/newTesto", (req, res) => {
   if (!req.body.contenuto || !req.body.idProgetto || !req.body.nomeArtista) {
@@ -483,7 +503,11 @@ app.post("/newTesto", (req, res) => {
       .status(400)
       .json({ error: "Contenuto, idProgetto e nomeArtista sono richiesti" });
   }
-  const { contenuto, idProgetto, nomeArtista } = req.body;
+  console.log("new testo"+JSON.stringify(req.body));
+  const contenuto=req.body.contenuto;
+  const idProgetto=req.body.idProgetto;
+  const nomeArtista=req.body.nomeArtista;
+  console.log(contenuto+"   "+idProgetto);
   insertTesto(contenuto, idProgetto, nomeArtista)
     .then(() => {
       res.json({ message: "Testo inserito correttamente" });
@@ -528,6 +552,7 @@ app.post("/collaborazioni", (req, res) => {
   }
   let nomeArtista = req.body.nomeArtista;
   let idProgetto = req.body.idProgetto;
+  console.log(req.body);
   insertPartecipazione(nomeArtista, idProgetto)
     .then(() => {
       res.json({ message: "Partecipazione inserita correttamente" });
@@ -617,6 +642,12 @@ app.delete("/text/:id", (req, res) => {
       res.status(500).json({ error: error.message });
     });
 });
+
+
+
+
+
+
 
 const server = http.createServer(app);
 server.listen(5100, () => {
