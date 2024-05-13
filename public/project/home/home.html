@@ -9,6 +9,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./home.css">
+<style>
+  /* Stili CSS opzionali per migliorare l'aspetto */
+  #itemsContainer {
+    list-style-type: none;
+    padding: 0;
+  }
+  #itemsContainer li {
+    margin-bottom: 5px;
+    padding: 10px;
+    background-color: #0b0b0b;
+    border-radius: 5px;
+  }
+</style>
 </head>
 <body>
 
@@ -104,6 +117,10 @@
           <form id="formFeat">
             <input placeholder='Enter name project' class='inputModal' name='text' id='nameProjectFeat' type='text' required><br><br>
             <input placeholder='Enter name Artist' class='inputModal' name='text' id='nameArtist' type='text' required><br><br>
+            <!--Prova-->
+            <ul id="itemsContainer">
+              <!-- Gli elementi filtrati verranno aggiunti qui dinamicamente -->
+            </ul>
             <div style="text-align: center;">
               <button data-bs-dismiss="modal" class="c-button c-button--gooey" id="CreateProjectFeat" type="button"> Create
                 <div class="c-button__blobs">

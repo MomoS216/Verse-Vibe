@@ -240,7 +240,7 @@ const selectUtenteLogin = (nomeUtente) => {
 
 const selectAllUtenti = () => {
   const sql = `
-    SELECT nome,email FROM utente;
+    SELECT nome FROM utente;
   `;
   return executeQuery(sql);
 };

@@ -118,6 +118,81 @@ function selectProgetto(nome1,user) {
 }
 
 
+
+
+
+
+
+
+
+// Ottenere l'elemento input e il contenitore degli elementi da filtrare
+const itemsContainer = document.getElementById('itemsContainer');
+let items=[];
+
+fetch('/allUsers')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Errore durante la richiesta al server');
+    }
+    return response.json();
+  })
+  .then(data => {
+   items = data.Users.map(user => user.nome); // Estrai solo i nomi dall'array di utenti
+    console.log(items); // Ora hai un array di nomi
+  })
+  .catch(error => {
+    console.error(error);
+  });
+
+
+
+// Funzione per filtrare gli elementi in base all'input
+const filterItems = (searchTerm) => {
+  // Converti il termine di ricerca in minuscolo per una corrispondenza case-insensitive
+  const term = searchTerm.toLowerCase();
+  // Filtra gli elementi che includono il termine di ricerca
+  const filteredItems = items.filter(item => item.toLowerCase().includes(term));
+  // Ritorna gli elementi filtrati
+  return filteredItems;
+};
+
+// Funzione per aggiornare l'interfaccia utente con gli elementi filtrati
+const updateUI = (filteredItems) => {
+  // Svuota il contenitore degli elementi
+  itemsContainer.innerHTML = '';
+  // Aggiungi gli elementi filtrati al contenitore
+  filteredItems.forEach(item => {
+    const listItem = document.createElement('li');
+    listItem.textContent = item;
+    itemsContainer.appendChild(listItem);
+  });
+};
+
+// Aggiungi un listener agli eventi sull'input per catturare il testo inserito dall'utente
+inputArtistFeat.addEventListener('input', (event) => {
+  // Ottieni il valore dell'input
+  const searchTerm = event.target.value;
+  // Filtra gli elementi in base al termine di ricerca
+  const filteredItems = filterItems(searchTerm);
+  // Aggiorna l'interfaccia utente con gli elementi filtrati
+  updateUI(filteredItems);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function renderPrimario(){
 
   fetchSoloProjects(username.user)
@@ -207,6 +282,9 @@ fetchFeatProjects(username.user)
 
 
 if (username.log) {
+
+  // Inizialmente, mostra tutti gli elementi
+updateUI(items);
 
   btnModalSolo.onclick = () => {
     const currentDate = new Date();
