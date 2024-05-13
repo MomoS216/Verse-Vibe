@@ -2,8 +2,11 @@ document.getElementById('signupForm').addEventListener('submit', function(event)
     event.preventDefault();
     const username = document.getElementById('txtSign').value;
     const password = document.getElementById('pswdSign').value;
+    const password1 = document.getElementById('pswdSign1').value;
     const email = document.getElementById('emailSign').value;
 
+
+    if(password===password1){
     fetch('/registrazione', {
       method: 'POST',
       headers: {
@@ -32,7 +35,17 @@ document.getElementById('signupForm').addEventListener('submit', function(event)
     .catch(error => {
       console.error('Error:', error);
     });
+
+  }else{
+  signupResult.innerHTML = `
+  <div class="alert alert-danger" role="alert">
+    Password non corrispondono
+  </div>
+`;
+}
+
   });
+
 
   document.getElementById('loginForm').addEventListener('submit', function(event) {
     event.preventDefault();
