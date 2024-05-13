@@ -108,12 +108,66 @@ function selectProgetto(nome1,user) {
       return response.json();
     })
     .then(data => {
+      console.log(data);
       resolve(data);
     })
     .catch(error => {
       reject(error);
     });
   });
+}
+
+
+function renderPrimario(){
+
+  fetchSoloProjects(username.user)
+  .then((result) => {
+      if(result.result.length!=0){
+      //divSolo.innerHTML=JSON.stringify(result);
+      console.log(result.result);
+      divSolo.innerHTML=render(result.result);
+      let pulsantiProgetto = document.querySelectorAll('.progetto');
+    pulsantiProgetto.forEach((button, index) => {
+      button.onclick = () => {
+        const id = button.id;
+        console.log('Hai cliccato sul pulsante con ID del progetto:', id);
+        sessionStorage.setItem("idProgetto", id);
+        window.location.href = "../progetto/progetto.html";
+      };
+    });
+  }else{
+          divSolo.innerHTML="Ancora nessun progetto SOLO"
+      }
+  })
+  .catch((error) => {
+      divSolo.innerHTML="Errore durante il recupero dei progetti solo:  "+ error;
+  });
+
+fetchFeatProjects(username.user)
+  .then((result) => {
+      if(result.result.length!=0){
+        console.log(result.result);
+          //divFeat.innerHTML=JSON.stringify(result);
+          divFeat.innerHTML=render(result.result);
+
+          let pulsantiProgetto = document.querySelectorAll('.progetto');
+    pulsantiProgetto.forEach((button, index) => {
+      button.onclick = () => {
+        const id = button.id;
+        console.log('Hai cliccato sul pulsante con ID del progetto:', id);
+        sessionStorage.setItem("idProgetto", id);
+        window.location.href = "../progetto/progetto.html";
+      };
+    });
+
+      }else{
+              divFeat.innerHTML="Ancora nessun progetto FEAT"
+          }
+  })
+  .catch((error) => {
+      divFeat.innerHTML="Errore durante il recupero dei progetti feat:  "+ error;
+  });
+
 }
 
   
@@ -165,6 +219,7 @@ console.log(username);
         .then((result) => {
             alert(result.message); 
             console.log(result.message);
+            renderPrimario();
         })
         .catch((error) => {
             alert(error);
@@ -190,67 +245,30 @@ let artista = inputArtistFeat.value;
       .then((result) => {  
         console.log("select ", result);
         dato = result.progetto;
+        console.log(result);
+
+
+        insertPartecipazioneFetch(artista,result.progetto[0].id).then((result) => {  
+          alert(result.message);
+          renderPrimario();
+                  })
+                  .catch((error) => {
+                      alert(error);
+                  });
+
       })
       .catch((error) => {
         alert(error);
       });
 
-      insertPartecipazione(artista,dato.progetto.id).then((result) => {  
-        alert(result.message);
-                })
-                .catch((error) => {
-                    alert(error);
-                });
+     
 }
 
+renderPrimario();
+
+
     
-  fetchSoloProjects(username.user)
-    .then((result) => {
-        if(result.result.length!=0){
-        //divSolo.innerHTML=JSON.stringify(result);
-        console.log(result.result);
-        divSolo.innerHTML=render(result.result);
-        let pulsantiProgetto = document.querySelectorAll('.progetto');
-      pulsantiProgetto.forEach((button, index) => {
-        button.onclick = () => {
-          const id = button.id;
-          console.log('Hai cliccato sul pulsante con ID del progetto:', id);
-          sessionStorage.setItem("idProgetto", id);
-          window.location.href = "../progetto/progetto.html";
-        };
-      });
-    }else{
-            divSolo.innerHTML="Ancora nessun progetto SOLO"
-        }
-    })
-    .catch((error) => {
-        divSolo.innerHTML="Errore durante il recupero dei progetti solo:  "+ error;
-    });
-  
-  fetchFeatProjects(username.user)
-    .then((result) => {
-        if(result.result.length!=0){
-          console.log(result.result);
-            //divFeat.innerHTML=JSON.stringify(result);
-            divFeat.innerHTML=render(result.result);
-
-            let pulsantiProgetto = document.querySelectorAll('.progetto');
-      pulsantiProgetto.forEach((button, index) => {
-        button.onclick = () => {
-          const id = button.id;
-          console.log('Hai cliccato sul pulsante con ID del progetto:', id);
-          sessionStorage.setItem("idProgetto", id);
-          window.location.href = "../progetto/progetto.html";
-        };
-      });
-
-        }else{
-                divFeat.innerHTML="Ancora nessun progetto FEAT"
-            }
-    })
-    .catch((error) => {
-        divFeat.innerHTML="Errore durante il recupero dei progetti feat:  "+ error;
-    });
+ 
   
 
 
