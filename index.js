@@ -9,6 +9,8 @@ const conf = require("./conf.js");
 console.log(conf);
 const connection = mysql.createConnection(conf);
 const bodyParser = require("body-parser");
+const socketIO = require("socket.io");
+const multer = require('multer');
 
 app.use(bodyParser.json());
 app.use(
@@ -23,7 +25,48 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "/public/project/index.html"));
 });
 
+const server = http.createServer(app);
 
+// Creazione dell'istanza di Socket.IO passando il server HTTP
+const io = socketIO(server);
+
+// Logica per la gestione dei socket e delle chat
+let chats = []; // Array per memorizzare le informazioni sulle chat
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
+
+  // Unisciti a una room specifica
+  socket.on("join room", (room) => {
+    socket.join(room);
+    console.log(`User joined room: ${room}`);
+    // Se la chat non esiste ancora, la creiamo
+    if (!chats.find((chat) => chat.chat === room)) {
+      chats.push({ chat: room, messaggi: [] });
+    }
+  });
+
+  // Ascolta i messaggi di chat e li trasmette a tutti nella stessa room
+  socket.on("chat message", (room, { username, message, timestamp }) => {
+    io.to(room).emit("chat message", { username, message, timestamp }); // Trasmetti l'username e il messaggio
+    let chat = chats.find((chat) => chat.chat === room);
+    if (chat) {
+      chat.messaggi.push({
+        autore: username,
+        ora: timestamp,
+        messaggio: message,
+      });
+    }
+
+    console.log(chats);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+  });
+
+  socket.on("message", (data) => {});
+});
 
 
 
@@ -51,6 +94,32 @@ const executeQuery = (sql) => {
     });
   });
 };
+
+
+//caricamento file
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '/public/audio'));
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  }
+});
+
+const upload = multer({ storage: storage });
+
+
+app.post('/upload', upload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('Nessun file caricato.');
+  }
+
+  res.send('File caricato con successo.');
+});
+
+
+
+
 
 
 
@@ -93,6 +162,12 @@ const queries = [
     idProgetto INT,
     FOREIGN KEY (idProgetto) REFERENCES progetto(id) ON DELETE CASCADE ON UPDATE CASCADE
   );`,
+  `CREATE TABLE IF NOT EXISTS audio(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    path VARCHAR(50),
+    idProgetto INT,
+    FOREIGN KEY (idProgetto) REFERENCES progetto(id) ON DELETE CASCADE ON UPDATE CASCADE
+  );`,
   `CREATE TABLE IF NOT EXISTS messaggio(
     id INT AUTO_INCREMENT PRIMARY KEY,
     contenuto TEXT NOT NULL,
@@ -118,6 +193,14 @@ async function createTables() {
 createTables();
 
 //INSERTS
+const insertAudio = (path, idProgetto) => {
+  const sql = `
+    INSERT INTO audio (path, idProgetto) VALUES ('${path}', ${idProgetto})
+  `;
+  console.log(sql);
+  return executeQuery(sql);
+};
+
 const insertUtente = (nome, password, email) => {
   const sql = `
         INSERT INTO utente (nome, password, email) VALUES ('${nome}', '${password}', '${email}')
@@ -285,7 +368,67 @@ const selectProgettoId = (id) => {
   return executeQuery(sql);
 };
 
+const selectChatId = (idProgetto) => {
+  const sql = `
+    SELECT id
+    FROM chat
+    WHERE idProgetto = '${idProgetto}';
+  `;
+  return executeQuery(sql);
+};
+
+const selectAudio = (idProgetto) => {
+  const sql = `
+    SELECT * FROM audio WHERE idProgetto = ${idProgetto}
+  `;
+  console.log(sql);
+  return executeQuery(sql);
+};
+
+
+
 //SERVIZI
+app.post("/provaIdChat", (req, res) => {
+  if (!req.body.idProgetto) {
+    return res.status(400).json({ error: "ID progetto richiesto" });
+  }
+  const idProgetto = req.body.idProgetto;
+
+  selectChatId(idProgetto)
+    .then((result) => {
+      if (result.length === 0) {
+        return res.status(404).json({ error: "Nessuna chat trovata per questo progetto" });
+      } else {
+        res.json({ chatId: result[0].id });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ error: error });
+    });
+});
+
+
+
+app.post("/chatId", (req, res) => {
+  if (!req.body.idProgetto) {
+    return res.status(400).json({ error: "ID progetto richiesto" });
+  }
+  const idProgetto = req.body.idProgetto;
+
+  selectChatId(idProgetto)
+    .then((result) => {
+      if (result.length === 0) {
+        return res.status(404).json({ error: "Nessuna chat trovata per questo progetto" });
+      } else {
+        res.json({ chatId: result[0].id });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ error: error});
+    });
+});
+
+
 const bcrypt = require('bcrypt');
 
 app.post("/registrazione", (req, res) => {
@@ -337,7 +480,7 @@ app.post("/login", (req, res) => {
       });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error});
     });
 });
 
@@ -350,7 +493,7 @@ app.get("/allUsers", (req, res) => {
       res.json({ Users: result });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
@@ -362,7 +505,7 @@ app.post("/progettoByName", (req, res) => {
       res.json({ progetto: result });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
@@ -373,7 +516,7 @@ app.post("/progettoById", (req, res) => {
       res.json({ progetto: result });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
@@ -394,7 +537,7 @@ app.post("/soloProgects", (req, res) => {
       }
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
@@ -414,7 +557,7 @@ console.log("usernameFeat"+username);
       }
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
@@ -435,7 +578,7 @@ app.post("/chat", (req, res) => {
       }
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
@@ -456,28 +599,13 @@ app.post("/testiProgetto", (req, res) => {
       }
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
 
 
-app.post("/prova",(req,res)=>{
- 
-  const data = req.body.data;
-  const nome = req.body.nome;
-  const tipo = req.body.tipo;
-  const nomeArtista = req.body.nomeArtista;
-  
-  insertProgetto(data, nome, tipo, nomeArtista)
-    .then(() => {
-      res.json({ message: "Progetto inserito correttamente" });
-    })
-    .catch((error) => {
-      console.error("Errore durante l'inserimento del progetto:", error);
-      res.status(500).json({ error: "Si è verificato un errore durante l'inserimento del progetto." });
-    });
-});
+
 
 
 app.post("/prova1",(req,res)=>{
@@ -513,36 +641,68 @@ app.post("/newTesto", (req, res) => {
       res.json({ message: "Testo inserito correttamente" });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
 app.post("/messages", (req, res) => {
-  if (!req.body.messages || !Array.isArray(req.body.messages)) {
-    return res.status(400).json({ error: "Array di messaggi richiesto" });
+  const message = req.body.message;
+console.log(message);
+  if (!message) {
+      return res.status(400).json({ error: "Messaggio richiesto" });
   }
-  const messages = req.body.messages;
-  Promise.all(
-    messages.map(async (message) => {
-      try {
-        await insertMessaggio(
-          message.contenuto,
-          message.nomeArtista,
-          message.idChat,
-          message.data,
-        );
-      } catch (error) {
-        throw error;
-      }
-    }),
-  )
+  const contenuto = message.contenuto;
+  const nomeArtista = message.nomeArtista;
+  const idChat = message.idChat;
+  const data = message.data;
+
+  insertMessaggio(contenuto, nomeArtista, idChat, data)
+      .then(() => {
+          res.json({ message: "Messaggio inserito correttamente" });
+      })
+      .catch((error) => {
+          res.status(500).json({ error: error });
+      });
+});
+
+app.post("/saveMessage",(req,res)=>{
+  console.log(JSON.stringify(req.body.message));
+  const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
+//  insertMessaggio(req.body.message.contenuto, req.body.message.nomeArtista, req.body.message.idChat, `"${timestamp}"`);
+})
+
+app.post("/insertAudio", (req, res) => {
+  const path=req.body.path;
+  const idProgetto=req.body.idProgetto;
+  if (!path || !idProgetto) {
+    return res.status(400).json({ error: "Path e idProgetto sono richiesti" });
+  }
+
+  insertAudio(path, idProgetto)
     .then(() => {
-      res.json({ message: "Messaggi inseriti correttamente" });
+      res.json({ message: "Audio inserito correttamente" });
     })
     .catch((error) => {
       res.status(500).json({ error: error.message });
     });
 });
+
+app.post("/selectAudio", (req, res) => {
+  const idProgetto = req.body.idProgetto;
+  
+  if (!idProgetto) {
+    return res.status(400).json({ error: "idProgetto è richiesto" });
+  }
+
+  selectAudioByIdProgetto(idProgetto)
+    .then((result) => {
+      res.json(result);
+    })
+    .catch((error) => {
+      res.status(500).json({ error: error.message });
+    });
+});
+
 
 app.post("/collaborazioni", (req, res) => {
   if (!req.body.nomeArtista || !req.body.idProgetto) {
@@ -558,7 +718,7 @@ app.post("/collaborazioni", (req, res) => {
       res.json({ message: "Partecipazione inserita correttamente" });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
@@ -572,7 +732,7 @@ app.post("/newChat", (req, res) => {
       res.json({ message: "Chat creata correttamente" });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
@@ -583,7 +743,7 @@ app.delete("/user/:nome", (req, res) => {
       res.json({ message: "Utente eliminato correttamente" });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
@@ -594,7 +754,7 @@ app.delete("/project/:id", (req, res) => {
       res.json({ message: "Progetto eliminato correttamente" });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
@@ -606,7 +766,7 @@ app.delete("/participation/:nomeArtista/:idProgetto", (req, res) => {
       res.json({ message: "Partecipazione eliminata correttamente" });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
@@ -617,7 +777,7 @@ app.delete("/chat/:id", (req, res) => {
       res.json({ message: "Chat eliminata correttamente" });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
@@ -628,7 +788,7 @@ app.delete("/message/:id", (req, res) => {
       res.json({ message: "Messaggio eliminato correttamente" });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
@@ -639,7 +799,7 @@ app.delete("/text/:id", (req, res) => {
       res.json({ message: "Testo eliminato correttamente" });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 
@@ -649,7 +809,7 @@ app.delete("/text/:id", (req, res) => {
 
 
 
-const server = http.createServer(app);
+
 server.listen(5100, () => {
   console.log("- server running");
 });

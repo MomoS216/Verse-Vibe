@@ -208,6 +208,7 @@ fetchFeatProjects(username.user)
         const id = button.id;
         console.log('Hai cliccato sul pulsante con ID del progetto:', id);
         sessionStorage.setItem("idProgetto", id);
+        sessionStorage.setItem("feat", 1);
         window.location.href = "../progetto/progetto.html";
       };
     });
