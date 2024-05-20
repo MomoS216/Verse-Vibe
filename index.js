@@ -493,7 +493,7 @@ app.post("/login", (req, res) => {
       // Confronta la password hashata con quella fornita dall'utente
       bcrypt.compare(password, result[0].password, (err, match) => {
         if (err) {
-          return res.status(500).json({ error: err.message });
+          return res.status(500).json({ error: err });
         }
         if (match) {
           res.json({ result: true,
@@ -671,7 +671,7 @@ app.post("/newTesto", (req, res) => {
 });
 
 app.post("/messages", (req, res) => {
-  const message = req.body.message;
+  const message = req.body;
 console.log(message);
   if (!message) {
       return res.status(400).json({ error: "Messaggio richiesto" });
@@ -691,7 +691,7 @@ console.log(message);
 });
 
 app.post("/saveMessage", (req, res) => {
-  console.log(JSON.stringify(req.body.message));
+  console.log(JSON.stringify(req.body));
 
   // Ottieni il timestamp corrente e convertilo al fuso orario italiano
   const timestamp = moment().tz('Europe/Rome').format('YYYY-MM-DD HH:mm:ss');
@@ -704,6 +704,7 @@ app.post("/saveMessage", (req, res) => {
           res.status(500).json({ error: error });
       });
 });
+
 
 app.post("/insertAudio", (req, res) => {
   const path=req.body.path;
@@ -739,7 +740,7 @@ app.post("/selectAudio", (req, res) => {
       res.json(result);
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
 });
 

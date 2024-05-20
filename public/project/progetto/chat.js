@@ -96,7 +96,7 @@ const fetchMessagesByProjectId = (idProgetto1) => {
 };
 
 // Funzione per salvare un messaggio sul server
-function saveMessageToServer(username, message) {
+function saveMessageToServer(username, message,idchat) {
   fetch('/saveMessage', {
       method: 'POST',
       headers: {
@@ -106,7 +106,7 @@ function saveMessageToServer(username, message) {
           message: {
               contenuto: message,
               nomeArtista: username,
-              idChat: room
+              idChat: idchat
           }
       })
   })
@@ -124,7 +124,7 @@ function saveMessageToServer(username, message) {
   });
 }
 
-// Recupera l'ID della chat o ne crea una nuova
+
 selectIdChat(idProgetto)
   .then(chatId1 => {
       room = chatId1;
@@ -134,12 +134,12 @@ selectIdChat(idProgetto)
       socket.emit("join room", room);
       console.log('Chat ID salvato in sessione:', chatId1, room);
 
-      // Recupera e visualizza i messaggi esistenti
+      
       fetchMessagesByProjectId(idProgetto)
           .then(messages => {
               console.log('Messaggi del progetto:', messages);
-              messageData = messages; // Assumi che `messageData` sia l'array dei messaggi
-              displayMessages(); // Funzione che visualizza i messaggi
+              messageData = messages; 
+              displayMessages();
           })
           .catch(error => {
               console.error('Errore durante il recupero dei messaggi:', error);
@@ -158,12 +158,12 @@ selectIdChat(idProgetto)
       });
   });
 
-// Aggiungi un evento di submit al form per inviare messaggi
+
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   if (input.value) {
       const data = new Date().toISOString().slice(0, 19).replace('T', ' ');
-      saveMessageToServer(nomeArtista, input.value);
+      saveMessageToServer(nomeArtista, input.value,room);
       socket.emit("chat message", room, {
           nomeArtista,
           contenuto: input.value,
@@ -173,17 +173,17 @@ form.addEventListener("submit", (e) => {
   }
 });
 
-// Variabile per mantenere i dati dei messaggi
+
 let messageData = []; 
 
-// Ascolta gli eventi "chat message" e aggiorna i messaggi
+
 socket.on("chat message", function (message) {
   messageData.push(message); 
   displayMessages(); 
   location.reload();
 });
 
-// Funzione per visualizzare i messaggi nella chat
+
 function displayMessages() {
   messages.innerHTML = messageData
       .map((message) => {
