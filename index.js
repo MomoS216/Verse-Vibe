@@ -10,6 +10,7 @@ console.log(conf);
 const connection = mysql.createConnection(conf);
 const bodyParser = require("body-parser");
 const socketIO = require("socket.io");
+const moment = require('moment-timezone');
 const multer = require('multer');
 
 app.use(bodyParser.json());
@@ -20,6 +21,8 @@ app.use(
 );
 
 app.use("/", express.static(path.join(__dirname, "public")));
+
+app.use("/audio", express.static(path.join(__dirname, "public/audio")));
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "/public/project/index.html"));
@@ -52,9 +55,9 @@ io.on("connection", (socket) => {
     let chat = chats.find((chat) => chat.chat === room);
     if (chat) {
       chat.messaggi.push({
-        autore: username,
-        ora: timestamp,
-        messaggio: message,
+        nomeArtista: username,
+        data: timestamp,
+        contenuto: message,
       });
     }
 
@@ -82,16 +85,17 @@ const leggiFile = (path) => {
   });
 };
 
-const executeQuery = (sql) => {
+const executeQuery = (sql, params = []) => {
   return new Promise((resolve, reject) => {
-    connection.query(sql, function (err, result) {
-      if (err) {
-        console.error(err);
-        reject();
-      }
-      console.log("done");
-      resolve(result);
-    });
+      connection.query(sql, params, function (err, result) {
+          if (err) {
+              console.error(err);
+              reject();
+              return;
+          }
+          console.log("done");
+          resolve(result);
+      });
   });
 };
 
@@ -164,7 +168,7 @@ const queries = [
   );`,
   `CREATE TABLE IF NOT EXISTS audio(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    path VARCHAR(50),
+    path TEXT,
     idProgetto INT,
     FOREIGN KEY (idProgetto) REFERENCES progetto(id) ON DELETE CASCADE ON UPDATE CASCADE
   );`,
@@ -173,7 +177,7 @@ const queries = [
     contenuto TEXT NOT NULL,
     nomeArtista VARCHAR(15),
     idChat INT,
-    data DATETIME NOT NULL, 
+    data TEXT NOT NULL, 
     FOREIGN KEY (nomeArtista) REFERENCES utente(nome) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (idChat) REFERENCES chat(id) ON DELETE CASCADE ON UPDATE CASCADE
   );`,
@@ -241,14 +245,35 @@ const insertChat = (idProgetto) => {
   return executeQuery(sql);
 };
 
+
+
+
 const insertMessaggio = (contenuto, nomeArtista, idChat, data) => {
+  // Crea un oggetto moment dalla data e imposta il fuso orario italiano
+  const dateObj = moment.tz(data, 'Europe/Rome');
+
+  // Converti la data in formato accettato da MySQL (YYYY-MM-DD HH:MM:SS)
+  const dataFormatted = dateObj.format('YYYY-MM-DD HH:mm:ss');
+
   const sql = `
-        INSERT INTO messaggio (contenuto, nomeArtista, idChat, data) VALUES ('${contenuto}', '${nomeArtista}', ${idChat}, ${data})
-    `;
+      INSERT INTO messaggio (contenuto, nomeArtista, idChat, data) VALUES (?, ?, ?, ?)
+  `;
+  executeQuery(sql, [contenuto, nomeArtista, idChat, dataFormatted]).then(result => {
+      return true;
+  });
+};
+
+
+//DELETS
+const deleteAudioByIdProgetto = (id) => {
+  const sql = `
+    DELETE FROM audio WHERE idProgetto = ${id}
+  `;
+  console.log(sql);
   return executeQuery(sql);
 };
 
-//DELETS
+
 const deleteUtente = (nome) => {
   const sql = `
     DELETE FROM utente WHERE nome = '${nome}';
@@ -665,11 +690,20 @@ console.log(message);
       });
 });
 
-app.post("/saveMessage",(req,res)=>{
+app.post("/saveMessage", (req, res) => {
   console.log(JSON.stringify(req.body.message));
-  const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
-//  insertMessaggio(req.body.message.contenuto, req.body.message.nomeArtista, req.body.message.idChat, `"${timestamp}"`);
-})
+
+  // Ottieni il timestamp corrente e convertilo al fuso orario italiano
+  const timestamp = moment().tz('Europe/Rome').format('YYYY-MM-DD HH:mm:ss');
+
+  insertMessaggio(req.body.message.contenuto, req.body.message.nomeArtista, req.body.message.idChat, timestamp)
+      .then(() => {
+          res.json({ message: "Messaggio inserito correttamente" });
+      })
+      .catch((error) => {
+          res.status(500).json({ error: error });
+      });
+});
 
 app.post("/insertAudio", (req, res) => {
   const path=req.body.path;
@@ -677,14 +711,20 @@ app.post("/insertAudio", (req, res) => {
   if (!path || !idProgetto) {
     return res.status(400).json({ error: "Path e idProgetto sono richiesti" });
   }
-
-  insertAudio(path, idProgetto)
+deleteAudioByIdProgetto(idProgetto).then(result=>{
+  if(result){
+    insertAudio(path, idProgetto)
     .then(() => {
       res.json({ message: "Audio inserito correttamente" });
     })
     .catch((error) => {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error });
     });
+  }else{
+    res.status(500).json({ error: error });
+  }
+})
+ 
 });
 
 app.post("/selectAudio", (req, res) => {
@@ -694,7 +734,7 @@ app.post("/selectAudio", (req, res) => {
     return res.status(400).json({ error: "idProgetto è richiesto" });
   }
 
-  selectAudioByIdProgetto(idProgetto)
+  selectAudio(idProgetto)
     .then((result) => {
       res.json(result);
     })

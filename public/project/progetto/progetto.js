@@ -2,6 +2,7 @@ const idProgetto = sessionStorage.getItem("idProgetto");
 const div = document.getElementById("prova");
 const testoBtn = document.getElementById("inputTesto");
 const aggiungiBtn = document.getElementById("aggiungiBtn");
+const chat = document.getElementById("chatButton");
 let datiProgetto;
 
 const insertNewMessage = (messages) => {
@@ -132,13 +133,23 @@ function render(idP) {
     fetchTextsByProjectId(idProgetto).then((testi) => {
       let html = "";
       for (let i = 0; i < testi.result.length; i++) {
-        html += `<input type="text" value="${testi.result[i].contenuto}" /><br>`;
+        html += `<p style="background-color: #fd7e14; color: #fff; display: inline-block; padding: 5px 10px; border-radius: 5px;">${testi.result[i].contenuto}</p><br>`;
+
       }
       div.innerHTML = html;
     });
   }).catch((error) => {
     console.log("nessun progetto  " + error);
   });
+}
+
+let feat=sessionStorage.getItem('feat');
+console.log("sessione feat"+feat);
+if (feat == 1) {
+  chat.style.display = "block";
+}
+if (feat == 0) {
+  chat.style.display = "none";
 }
 
 aggiungiBtn.onclick = () => {
@@ -155,3 +166,53 @@ if (idProgetto != -1) {
   window.location.href = './home/home.html';
 }
 
+
+
+const fetchAudioByProjectId = (idProgetto) => {
+  return new Promise((resolve, reject) => {
+    fetch('/selectAudio', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ idProgetto })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Errore durante il recupero dei file audio');
+      }
+      return response.json();
+    })
+    .then(data => {
+      resolve(data);
+    })
+    .catch(error => {
+      reject(error);
+    });
+  });
+};
+
+
+const player = document.getElementById('player'); 
+
+fetchAudioByProjectId(idProgetto)
+  .then(audioFiles => {
+    console.log('File audio del progetto:', audioFiles);
+    if (audioFiles.length > 0) {
+      audioFiles.forEach(file => {
+        const audioElement = document.createElement('audio');
+        audioElement.controls = true;
+        audioElement.innerHTML = `
+          <source src="/audio/${file.path}" type="audio/mpeg">
+          Your browser does not support the audio element.
+        `;
+        player.appendChild(audioElement);
+      });
+    } else {
+      player.innerHTML = 'Nessun file audio disponibile per questo progetto.';
+    }
+  })
+  .catch(error => {
+    console.error('Errore:', error);
+    player.innerHTML = 'Si è verificato un errore durante il caricamento dei file audio.';
+  });

@@ -1,14 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
 <meta charset="UTF-8">
+<link rel="stylesheet" href="./progetto.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Caricamento File</title>
+<!-- Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<h2>Carica un file</h2>
-<input type="file" id="fileInput">
-<button onclick="caricaFile()">Carica</button>
+<div class="container mt-5">
+  <h2 class="text-center" style="color: antiquewhite;">Carica un file MP3</h2>
+  <div class="text-center">
+    <a href="../progetto/progetto.html" class="btn btn-primary mt-3">Torna al Progetto</a>
+  </div>
+  <div class="form-group mt-4">
+    <input type="file" id="fileInput" class="form-control-file">
+  </div>
+  <div class="text-center">
+    <button onclick="caricaFile()" class="btn btn-success">Carica</button>
+  </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>
     const idProgetto = sessionStorage.getItem("idProgetto");
@@ -24,7 +41,8 @@
         const file = fileInput.files[0];
         const formData = new FormData();
         formData.append('file', file);
-console.log(JSON.stringify(formData));
+        console.log(file);
+
         fetch('/upload', {
             method: 'POST',
             body: formData
@@ -44,7 +62,7 @@ console.log(JSON.stringify(formData));
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    path: formData, 
+                    path: file.name, 
                     idProgetto: idProgetto
                 })
             });
@@ -54,6 +72,7 @@ console.log(JSON.stringify(formData));
                 throw new Error('Errore durante il salvataggio dell\'audio.');
             }
             alert('Audio salvato con successo.');
+            window.location.href = "./progetto.html";
         })
         .catch(error => {
             console.error('Errore:', error);
