@@ -179,8 +179,9 @@ let messageData = [];
 
 socket.on("chat message", function (message) {
   messageData.push(message); 
-  displayMessages(); 
   location.reload();
+  displayMessages(); 
+  
 });
 
 
