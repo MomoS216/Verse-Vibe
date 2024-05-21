@@ -139,4 +139,5 @@ conf.js
 
 
 
-/public/audio
+/public/audio/*
+!/public/audio/.gitkeep
