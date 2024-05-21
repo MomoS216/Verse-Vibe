@@ -641,7 +641,7 @@ app.post("/prova1",(req,res)=>{
   
   insertProgetto(data, nome, tipo, nomeArtista)
     .then(() => {
-      res.json({ message: "Progetto inserito correttamente" });
+      res.json({ message: true });
     })
     .catch((error) => {
       console.error("Errore durante l'inserimento del progetto:", error);

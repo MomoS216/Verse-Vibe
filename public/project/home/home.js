@@ -234,7 +234,19 @@ function provaProgetto(data, nome, tipo, nomeArtista) {
       },
       body: JSON.stringify({data: data, nome: nome, tipo: tipo, nomeArtista: nomeArtista}),
     })
-    .then(response => console.log(JSON.stringify(response)))
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Errore durante la richiesta al server');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log(data);
+      resolve(data);
+    })
+    .catch(error => {
+      reject(error);
+    });
   });
 }
 
@@ -248,9 +260,10 @@ if (username.log) {
     console.log(username);
     provaProgetto(formattedDate, inputTitleSolo.value, 0, username.user)
       .then((result) => {
-        alert(result.message); 
-        console.log(result.message);
-        renderPrimario();
+        if(result.message){renderPrimario();
+          inputTitleSolo.value="";
+        }
+        
       })
       .catch((error) => {
         alert(error);
@@ -280,7 +293,6 @@ if (username.log) {
 
         insertPartecipazioneFetch(artista, result.progetto[0].id)
           .then((result) => {  
-            alert(result.message);
             renderPrimario();
           })
           .catch((error) => {
