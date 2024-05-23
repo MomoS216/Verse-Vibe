@@ -260,10 +260,13 @@ if (username.log) {
     console.log(username);
     provaProgetto(formattedDate, inputTitleSolo.value, 0, username.user)
       .then((result) => {
-        if(result.message){renderPrimario();
+        if(result.message){
+          renderPrimario();
           inputTitleSolo.value="";
+          sessionStorage.setItem("idProgetto", result.id);
+          sessionStorage.setItem("feat", 0);
+          window.location.href = "../progetto/progetto.html";
         }
-        
       })
       .catch((error) => {
         alert(error);
@@ -278,9 +281,11 @@ if (username.log) {
     console.log(formattedDate);
     let titolo = inputTitleFeat.value;
     let artista = inputArtistFeat.value;
-
+let idNewProject;
     provaProgetto(formattedDate, titolo, 1, username.user)
-      .then((result) => {})
+      .then((result) => {
+        idNewProject=result.id;
+      })
       .catch((error) => {
         alert(error);
       });
@@ -294,6 +299,12 @@ if (username.log) {
         insertPartecipazioneFetch(artista, result.progetto[0].id)
           .then((result) => {  
             renderPrimario();
+             inputTitleFeat.value="";
+            inputArtistFeat.value="";
+            sessionStorage.setItem("idProgetto", idNewProject);
+            sessionStorage.setItem("feat", 1);
+            window.location.href = "../progetto/progetto.html";
+            
           })
           .catch((error) => {
             alert(error);

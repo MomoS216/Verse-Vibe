@@ -633,21 +633,35 @@ app.post("/testiProgetto", (req, res) => {
 
 
 
-app.post("/prova1",(req,res)=>{
-  const data = req.body.data;
-  const nome = req.body.nome;
-  const tipo = req.body.tipo;
-  const nomeArtista = req.body.nomeArtista;
+app.post("/prova1", (req, res) => {
+  const { data, nome, tipo, nomeArtista } = req.body;
   
   insertProgetto(data, nome, tipo, nomeArtista)
     .then(() => {
-      res.json({ message: true });
+      let sql = `SELECT id 
+                 FROM progetto 
+                 WHERE nomeArtista = ?
+                   AND data = ?
+                   AND nome = ?
+                   AND tipo = ?`;
+
+      executeQuery(sql, [nomeArtista, data, nome, tipo])
+        .then((result) => {
+          if (result.length > 0) {
+            res.json({ message: true, id: result[0].id });
+          } else {
+            res.status(404).json({ message: false, error: "Progetto non trovato." });
+          }
+        })
+        .catch((error) => {
+          res.status(500).json({ error: error.message });
+        });
     })
     .catch((error) => {
       console.error("Errore durante l'inserimento del progetto:", error);
       res.status(500).json({ error: "Si è verificato un errore durante l'inserimento del progetto." });
     });
-})
+});
 
 
 app.post("/newTesto", (req, res) => {
@@ -681,13 +695,12 @@ console.log(message);
   const idChat = message.idChat;
   const data = message.data;
 
-  insertMessaggio(contenuto, nomeArtista, idChat, data)
-      .then(() => {
-          res.json({ message: "Messaggio inserito correttamente" });
-      })
-      .catch((error) => {
-          res.status(500).json({ error: error });
-      });
+ 
+  if( insertMessaggio(contenuto, nomeArtista, idChat, data)){
+    res.json({ message: "Messaggio inserito correttamente" });
+  }else{
+    res.status(500).json({ error: error });
+  }
 });
 
 app.post("/saveMessage", (req, res) => {
@@ -696,13 +709,13 @@ app.post("/saveMessage", (req, res) => {
   // Ottieni il timestamp corrente e convertilo al fuso orario italiano
   const timestamp = moment().tz('Europe/Rome').format('YYYY-MM-DD HH:mm:ss');
 
-  insertMessaggio(req.body.message.contenuto, req.body.message.nomeArtista, req.body.message.idChat, timestamp)
-      .then(() => {
-          res.json({ message: "Messaggio inserito correttamente" });
-      })
-      .catch((error) => {
-          res.status(500).json({ error: error });
-      });
+
+  if( insertMessaggio(req.body.message.contenuto, req.body.message.nomeArtista, req.body.message.idChat, timestamp)){
+    res.json({ message: "Messaggio inserito correttamente" });
+  }else{
+    res.status(500).json({ error: error });
+  }
+
 });
 
 
