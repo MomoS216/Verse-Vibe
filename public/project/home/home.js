@@ -17,6 +17,30 @@ const inputArtistFeat = document.getElementById("nameArtist");
 const itemsContainer = document.getElementById('itemsContainer');
 let items = [];
 
+function deleteProgetto(idProgetto) {
+  return new Promise((resolve, reject) => {
+    fetch(`/project/${idProgetto}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Errore durante l\'eliminazione del progetto');
+      }
+      return response.json();
+    })
+    .then(data => {
+      resolve(data);
+    })
+    .catch(error => {
+      reject(error);
+    });
+  });
+}
+
+
 // Funzione per il fetch dei progetti solo
 const fetchSoloProjects = (username) => {
   return new Promise((resolve, reject) => {
@@ -172,13 +196,29 @@ function renderPrimario() {
       console.log(result.result);
       divSolo.innerHTML = render(result.result);
       let pulsantiProgetto = document.querySelectorAll('.progetto');
-      pulsantiProgetto.forEach((button, index) => {
+      let pulsantiDelete = document.querySelectorAll('.delete-progetto');
+      
+      pulsantiProgetto.forEach((button) => {
         button.onclick = () => {
           const id = button.id;
           console.log('Hai cliccato sul pulsante con ID del progetto:', id);
           sessionStorage.setItem("idProgetto", id);
           sessionStorage.setItem("feat", 0);
-          window.location.href = "../progetto/progetto.html";
+          return window.location.href = "../progetto/progetto.html";
+        };
+      });
+
+      pulsantiDelete.forEach((button) => {
+        button.onclick = () => {
+          const id = button.id.split('_')[1];
+          console.log('Hai cliccato sul pulsante Delete con ID del progetto:', id);
+          deleteProgetto(id)
+          .then(() => {
+            renderPrimario(); 
+          })
+          .catch((error) => {
+            alert("Errore durante l'eliminazione del progetto: " + error);
+          });
         };
       });
     } else {
@@ -195,13 +235,29 @@ function renderPrimario() {
       console.log(result.result);
       divFeat.innerHTML = render(result.result);
       let pulsantiProgetto = document.querySelectorAll('.progetto');
-      pulsantiProgetto.forEach((button, index) => {
+      let pulsantiDelete = document.querySelectorAll('.delete-progetto');
+      
+      pulsantiProgetto.forEach((button) => {
         button.onclick = () => {
           const id = button.id;
           console.log('Hai cliccato sul pulsante con ID del progetto:', id);
           sessionStorage.setItem("idProgetto", id);
           sessionStorage.setItem("feat", 1);
-          window.location.href = "../progetto/progetto.html";
+          return window.location.href = "../progetto/progetto.html";
+        };
+      });
+
+      pulsantiDelete.forEach((button) => {
+        button.onclick = () => {
+          const id = button.id.split('_')[1];
+          console.log('Hai cliccato sul pulsante Delete con ID del progetto:', id);
+          deleteProgetto(id)
+          .then(() => {
+            renderPrimario(); // Ricarica i progetti dopo l'eliminazione
+          })
+          .catch((error) => {
+            alert("Errore durante l'eliminazione del progetto: " + error);
+          });
         };
       });
     } else {
@@ -213,17 +269,36 @@ function renderPrimario() {
   });
 }
 
+
 const render = (array) => {
   let template = "";
   array.forEach((item, index) => {
     template += `
       <tr>
         <td>${item.nome}</td>
-        <td><button type="button" class="btn btn-info progetto" id="${item.id}">Apri</button></td>
+        <td>
+          <button type="button" class="btn btn-info progetto" id="${item.id}">Apri</button>
+          <button class="bin-button delete-progetto" id="delete_${item.id}">
+            <svg class="bin-top" viewBox="0 0 39 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line y1="5" x2="39" y2="5" stroke="white" stroke-width="4"></line>
+              <line x1="12" y1="1.5" x2="26.0357" y2="1.5" stroke="white" stroke-width="3"></line>
+            </svg>
+            <svg class="bin-bottom" viewBox="0 0 33 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <mask id="path-1-inside-1_8_19" fill="white">
+                <path d="M0 0H33V35C33 37.2091 31.2091 39 29 39H4C1.79086 39 0 37.2091 0 35V0Z"></path>
+              </mask>
+              <path d="M0 0H33H0ZM37 35C37 39.4183 33.4183 43 29 43H4C-0.418278 43 -4 39.4183 -4 35H4H29H37ZM4 43C-0.418278 43 -4 39.4183 -4 35V0H4V35V43ZM37 0V35C37 39.4183 33.4183 43 29 43V35V0H37Z" fill="white" mask="url(#path-1-inside-1_8_19)"></path>
+              <path d="M12 6L12 29" stroke="white" stroke-width="4"></path>
+              <path d="M21 6V29" stroke="white" stroke-width="4"></path>
+            </svg>
+          </button>
+        </td>
       </tr>`;
   });
   return template;
 };
+
+
 
 function provaProgetto(data, nome, tipo, nomeArtista) {
   return new Promise((resolve, reject) => {
@@ -273,7 +348,7 @@ if (username.log) {
       });
   }
 
-  let dato;
+
 
   btnModalFeat.onclick = () => {
     const currentDate = new Date();

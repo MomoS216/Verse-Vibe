@@ -288,9 +288,9 @@ const deleteProgetto = (id) => {
   return executeQuery(sql);
 };
 
-const deletePartecipa = (nomeArtista, idProgetto) => {
+const deletePartecipa = ( idProgetto) => {
   const sql = `
-    DELETE FROM partecipa WHERE nomeArtista = '${nomeArtista}' AND idProgetto = ${idProgetto};
+    DELETE FROM partecipa WHERE  idProgetto = ${idProgetto};
   `;
   return executeQuery(sql);
 };
@@ -803,26 +803,23 @@ app.delete("/user/:nome", (req, res) => {
 
 app.delete("/project/:id", (req, res) => {
   const id = req.params.id;
-  deleteProgetto(id)
+  deletePartecipa(id) 
     .then(() => {
+     
+      return deleteProgetto(id);
+    })
+    .then(() => {
+    
       res.json({ message: "Progetto eliminato correttamente" });
     })
     .catch((error) => {
+     
       res.status(500).json({ error: error });
     });
 });
 
-app.delete("/participation/:nomeArtista/:idProgetto", (req, res) => {
-  const nomeArtista = req.params.nomeArtista;
-  const idProgetto = req.params.idProgetto;
-  deletePartecipa(nomeArtista, idProgetto)
-    .then(() => {
-      res.json({ message: "Partecipazione eliminata correttamente" });
-    })
-    .catch((error) => {
-      res.status(500).json({ error: error });
-    });
-});
+
+
 
 app.delete("/chat/:id", (req, res) => {
   const id = req.params.id;
