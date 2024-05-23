@@ -20,6 +20,11 @@ const myModal = new bootstrap.Modal("#modalAccedi");
 let room = "";
 let username = "";
 
+
+
+
+
+
 // Funzione per recuperare l'ID della chat
 function selectIdChat(idProgetto) {
   return new Promise((resolve, reject) => {
@@ -179,20 +184,75 @@ let messageData = [];
 
 socket.on("chat message", function (message) {
   messageData.push(message); 
-  location.reload();
+ // location.reload();
   displayMessages(); 
-  
+  console.log("messaggio"+ JSON.stringify(message));
 });
 
 
 function displayMessages() {
-  messages.innerHTML = messageData
-      .map((message) => {
-          if (message.nomeArtista === usernameSession.user) {
-              return `<li style="text-align: right;">Io (${message.data}): ${message.contenuto}</li><br>`;
-          } else {
-              return `<li>${message.nomeArtista} (${message.data}): ${message.contenuto}</li><br>`;
-          }
-      })
-      .join("");
+    messages.innerHTML = messageData
+        .map((message) => {
+            if (message.nomeArtista === usernameSession.user) {
+                return `
+                <li class="d-flex justify-content-end mb-4">
+                <div class="card mask-custom" style="width: fit-content; max-width: 50%;">
+                    <div class="card-header d-flex justify-content-between p-3 align-items-center"
+                         style="border-bottom: 1px solid rgba(255,255,255,.3);">
+                        <p class="fw-bold mb-0" style="margin-right: 10px;">Io</p>
+                        <p class="small mb-0"><i class="far fa-clock"></i>${formatTimestamp(message.data)}</p>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">
+                        ${message.contenuto}
+                        </p>
+                    </div>
+                </div>
+            </li>`;
+            } else {
+                return `
+                <li class="d-flex justify-content-start mb-4">
+                <div class="card mask-custom" style="width: fit-content; max-width: 50%;">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <p class="fw-bold mb-0 me-3">${message.nomeArtista}</p>
+                        <div>
+                            <p class="small mb-0"><i class="far fa-clock"></i>${formatTimestamp(message.data)}  
+                            <button class="btn btn-trasparent btn-sm text-dark align-middle" style="padding: 0; border: none;" data-bs-toggle="popover" title="Titolo del Popover" data-bs-content="Contenuto del Popover">
+                                <span class="material-symbols-rounded align-middle">
+                                    more_vert
+                                </span>
+                            </button></p>
+                            
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">
+                        ${message.contenuto}
+                        </p>
+                    </div>
+                </div>
+            </li>`;
+
+
+            }
+        })
+        .join("");
+}
+
+
+
+
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    
+    // Estrai i componenti della data e dell'ora
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // I mesi sono indicizzati da 0
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    // Format the date and time
+    return `${hours}:${minutes}`;
 }
