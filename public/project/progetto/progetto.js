@@ -126,35 +126,57 @@ const fetchTextsByProjectId = (idProgetto) => {
   });
 };
 
+
+
+
+
 function render(idP) {
   selectProgetto({ id: idP }).then((result) => {
     console.log(result);
     let nomeProgetto = result.progetto[0].nome;
-   
-
     if (result.progetto[0].tipo == 0) {
       chat.style.display = "none";
-    }else{
-        chat.style.display = "block";
-     
+    } else {
+      chat.style.display = "block";
     }
-
-
     console.log(result.progetto[0].tipo);
     document.getElementById('username').innerHTML = nomeProgetto;
     datiProgetto = result.progetto[0];
     fetchTextsByProjectId(idProgetto).then((testi) => {
       let html = "";
       for (let i = 0; i < testi.result.length; i++) {
-        html += `<p style="background-color: #fd7e14; color: #fff; display: inline-block; padding: 5px 10px; border-radius: 5px;">${testi.result[i].contenuto}</p><br>`;
-
+        html += `<textarea id="${testi.result[i].id}" class="box" rows="4" cols="50">${testi.result[i].contenuto}</textarea><br>`;
       }
       div.innerHTML = html;
+
+      // Call adjustTextareaHeight after updating the innerHTML
+      adjustTextareaHeight();
     });
   }).catch((error) => {
     console.log("nessun progetto  " + error);
   });
 }
+
+function adjustTextareaHeight() {
+  const textareas = document.querySelectorAll('.box');
+
+  textareas.forEach((textarea) => {
+    // Adjust height based on content on page load
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+
+    // Adjust height dynamically as content changes
+    textarea.addEventListener('input', () => {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    });
+  });
+}
+
+// Example call to render function
+render(1);
+
+
 
 
 

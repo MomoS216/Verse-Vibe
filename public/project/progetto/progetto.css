@@ -327,5 +327,24 @@
 }
 
 
+/* Stile generale della textarea */
+.box {
+  width: 30%;
+  padding: 10px;
+  border: none; /* Rimuove il bordo */
+  border-radius: 8px;
+  resize: vertical; /* Consente di ridimensionare solo verticalmente */
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  background-color: #f9f9f9; /* Colore di sfondo */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombra */
+  transition: box-shadow 0.3s ease; /* Transizione fluida per l'ombra */
+}
 
+/* Stile quando la textarea ha il focus */
+.box:focus {
+  outline: none; /* Rimuove l'outline */
+  box-shadow: 0 0 0 3px #007bff, 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombra più accentuata quando ha il focus */
+}
 
