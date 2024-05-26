@@ -50,14 +50,14 @@ io.on("connection", (socket) => {
   });
 
   // Ascolta i messaggi di chat e li trasmette a tutti nella stessa room
-  socket.on("chat message", (room, { username, message, timestamp }) => {
-    io.to(room).emit("chat message", { username, message, timestamp }); // Trasmetti l'username e il messaggio
+  socket.on("chat message", (room, { nomeArtista, contenuto, data }) => {
+    io.to(room).emit("chat message", { nomeArtista, contenuto, data }); // Trasmetti l'username e il messaggio
     let chat = chats.find((chat) => chat.chat === room);
     if (chat) {
       chat.messaggi.push({
-        nomeArtista: username,
-        data: timestamp,
-        contenuto: message,
+        nomeArtista: nomeArtista,
+        data: data,
+        contenuto: contenuto,
       });
     }
 

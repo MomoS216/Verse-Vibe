@@ -1,7 +1,5 @@
 // Inizializzazione delle variabili di sessione
 sessionStorage.setItem("idProgetto", -1);
-sessionStorage.setItem("feat", 0);
-sessionStorage.setItem("solo", 0);
 console.log("Sessione feat:", sessionStorage.getItem("feat"));
 
 // Selezione degli elementi DOM
@@ -328,7 +326,6 @@ if (username.log) {
           renderPrimario();
           inputTitleSolo.value="";
           sessionStorage.setItem("idProgetto", result.id);
-          sessionStorage.setItem("solo", 1);
           window.location.href = "../progetto/progetto.html";
         }
       })
@@ -366,7 +363,6 @@ let idNewProject;
              inputTitleFeat.value="";
             inputArtistFeat.value="";
             sessionStorage.setItem("idProgetto", idNewProject);
-            sessionStorage.setItem("feat", 1);
             window.location.href = "../progetto/progetto.html";
             
           })
