@@ -4,6 +4,7 @@ const testoBtn = document.getElementById("inputTesto");
 const aggiungiBtn = document.getElementById("aggiungiBtn");
 const chat = document.getElementById("chatButton");
 let datiProgetto;
+let type;
 
 const insertNewMessage = (messages) => {
   return new Promise((resolve, reject) => {
@@ -127,7 +128,19 @@ const fetchTextsByProjectId = (idProgetto) => {
 
 function render(idP) {
   selectProgetto({ id: idP }).then((result) => {
+    console.log(result);
     let nomeProgetto = result.progetto[0].nome;
+   
+
+    if (result.progetto[0].tipo == 0) {
+      chat.style.display = "none";
+    }else{
+        chat.style.display = "block";
+     
+    }
+
+
+    console.log(result.progetto[0].tipo);
     document.getElementById('username').innerHTML = nomeProgetto;
     datiProgetto = result.progetto[0];
     fetchTextsByProjectId(idProgetto).then((testi) => {
@@ -143,14 +156,9 @@ function render(idP) {
   });
 }
 
-let feat=sessionStorage.getItem('feat');
-console.log("sessione feat"+feat);
-if (feat == 1) {
-  chat.style.display = "block";
-}
-if (feat == 0) {
-  chat.style.display = "none";
-}
+
+
+
 
 aggiungiBtn.onclick = () => {
   insertNewText(testoBtn.value, idProgetto, datiProgetto.nomeArtista).then((result) => {
