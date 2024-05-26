@@ -168,7 +168,9 @@ form.addEventListener("submit", (e) => {
   e.preventDefault();
   if (input.value) {
     let contenuto=input.value;
-      const data = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const now = new Date();
+    now.setHours(now.getHours() + 2);
+    const data = now.toISOString().slice(0, 19).replace('T', ' ');
       saveMessageToServer(nomeArtista, input.value,room);
       socket.emit("chat message", room, {
            nomeArtista,

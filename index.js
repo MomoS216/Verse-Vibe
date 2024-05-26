@@ -709,6 +709,8 @@ app.post("/saveMessage", (req, res) => {
   // Ottieni il timestamp corrente e convertilo al fuso orario italiano
   const timestamp = moment().tz('Europe/Rome').format('YYYY-MM-DD HH:mm:ss');
 
+  
+
 
   if( insertMessaggio(req.body.message.contenuto, req.body.message.nomeArtista, req.body.message.idChat, timestamp)){
     res.json({ message: "Messaggio inserito correttamente" });
