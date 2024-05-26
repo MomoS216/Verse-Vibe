@@ -276,7 +276,7 @@ const render = (array) => {
       <tr>
         <td>${item.nome}</td>
         <td>
-          <button type="button" class="btn btn-info progetto" id="${item.id}">Apri</button>
+          <button type="button" class="btn btn-info progetto" id="${item.id}">Open</button>
           <button type="button" class="btn btn-danger delete-progetto" id="delete_${item.id}">Delete</button>
         </td>
       </tr>`;
