@@ -329,22 +329,92 @@
 
 /* Stile generale della textarea */
 .box {
-  width: 30%;
-  padding: 10px;
-  border: none; /* Rimuove il bordo */
-  border-radius: 8px;
+  width: 40%; /* Imposta la larghezza al 40% del contenitore genitore */
+  height: 100px; /* Imposta l'altezza predefinita */
+  margin: 0 auto; /* Posiziona il div al centro orizzontalmente */
+  padding: 10px; /* Spazio interno */
+  border: 1px solid #ccc; /* Bordo */
+  border-radius: 8px; /* Angoli arrotondati */
   resize: vertical; /* Consente di ridimensionare solo verticalmente */
-  font-family: Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
+  font-family: Arial, sans-serif; /* Tipo di carattere */
+  font-size: 16px; /* Dimensione del carattere */
+  line-height: 1.5; /* Altezza della riga */
   background-color: #f9f9f9; /* Colore di sfondo */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombra */
-  transition: box-shadow 0.3s ease; /* Transizione fluida per l'ombra */
+  transition: border-color 0.3s ease; /* Transizione fluida per il colore del bordo */
 }
 
 /* Stile quando la textarea ha il focus */
 .box:focus {
   outline: none; /* Rimuove l'outline */
-  box-shadow: 0 0 0 3px #007bff, 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombra più accentuata quando ha il focus */
+  border-color: #007bff; /* Colore del bordo quando ha il focus */
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Ombra più accentuata quando ha il focus */
 }
+
+.form-floating {
+  margin-bottom: 20px; /* Spazio inferiore tra i div */
+}
+
+
+
+.bookmarkBtn1 {
+  width: 100px;
+  height: 40px;
+  border-radius: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.349);
+  background-color: rgb(12, 12, 12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition-duration: 0.3s;
+  overflow: hidden;
+}
+
+.IconContainer1 {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(to bottom, rgb(255, 136, 255), rgb(172, 70, 255));
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 2;
+  transition-duration: 0.3s;
+}
+
+.icon1 {
+  border-radius: 1px;
+}
+
+.text1 {
+  height: 100%;
+  width: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: 1;
+  transition-duration: 0.3s;
+  font-size: 1.04em;
+}
+
+.bookmarkBtn1:hover .IconContainer1 {
+  width: 90px;
+  transition-duration: 0.3s;
+}
+
+.bookmarkBtn1:hover .text1 {
+  transform: translate(10px);
+  width: 0;
+  font-size: 0;
+  transition-duration: 0.3s;
+}
+
+.bookmarkBtn1:active {
+  transform: scale(0.95);
+  transition-duration: 0.3s;
+}
+
+
 

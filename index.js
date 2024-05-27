@@ -412,6 +412,11 @@ const selectAudio = (idProgetto) => {
 
 
 
+
+
+
+
+
 //SERVIZI
 app.post("/provaIdChat", (req, res) => {
   if (!req.body.idProgetto) {
@@ -431,6 +436,36 @@ app.post("/provaIdChat", (req, res) => {
       res.status(500).json({ error: error });
     });
 });
+
+
+
+const updateText = (id, testo) => {
+  const sql = 'UPDATE testo SET contenuto = ? WHERE id = ?';
+  console.log(sql);
+  return executeQuery(sql, [testo, id]);
+};
+
+app.put("/updateText", (req, res) => {
+  console.log(req.body);
+  if (!req.body.id || !req.body.testo) {
+    return res.status(400).json({ error: "ID e testo sono richiesti" });
+  }
+  const id = req.body.id;
+  const testo = req.body.testo;
+
+  updateText(id, testo)
+    .then((result) => {
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Testo non trovato" });
+      }
+      res.json({ message: "Testo aggiornato con successo" });
+    })
+    .catch((error) => {
+      res.status(500).json({ error: error.message });
+    });
+});
+
+
 
 
 
@@ -855,11 +890,6 @@ app.delete("/text/:id", (req, res) => {
       res.status(500).json({ error: error });
     });
 });
-
-
-
-
-
 
 
 
