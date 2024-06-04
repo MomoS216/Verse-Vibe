@@ -378,7 +378,7 @@ body {
   }
   
   .buttonAccount:hover {
-    background: grey;
+    background: rgb(60, 58, 58);
   }
   
   .buttonAccount:hover .svg-icon {
