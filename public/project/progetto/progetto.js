@@ -1,12 +1,36 @@
 const idProgetto = sessionStorage.getItem("idProgetto");
 const div = document.getElementById("prova");
-const testoBtn = document.getElementById("inputTesto");
 const aggiungiBtn = document.getElementById("aggiungiBtn");
 const chat = document.getElementById("chatButton");
 const saveText = document.getElementById("save");
 const player = document.getElementById('player'); 
 let datiProgetto;
 let type;
+
+
+function deleteTesto(id) {
+  return new Promise((resolve, reject) => {
+    fetch(`/text/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Errore durante l\'eliminazione del progetto');
+      }
+      return response.json();
+    })
+    .then(data => {
+      resolve(data);
+    })
+    .catch(error => {
+      reject(error);
+    });
+  });
+}
+
 
 const insertNewMessage = (messages) => {
   return new Promise((resolve, reject) => {
@@ -223,15 +247,36 @@ fetchAudioByProjectId(idProgetto)
       fetchTextsByProjectId(idProgetto).then((testi) => {
         let html = "";
         for (let i = 0; i < testi.result.length; i++) {
+          console.log("testo id"+testi.result[i].id);
           html += `      
             <div class="form-floating">
               <textarea class="form-control box" placeholder="Leave a comment here" id="${testi.result[i].id}" style="height: 100px">${testi.result[i].contenuto}</textarea>
+              <button type="button" class="btn btn-danger delete-text" id="delete_${testi.result[i].id}"><span class="material-symbols-outlined">
+              delete
+              </span></button>
               <label for="floatingTextarea2">Text</label>
             </div><br>`;
         }
         div.innerHTML = html;
   
-        // Call adjustTextareaHeight after updating the innerHTML
+        let pulsantiDelete = document.querySelectorAll('.delete-text');
+      
+        pulsantiDelete.forEach((button2) => {
+          button2.onclick = () => {
+            const id = button2.id.split('_')[1];
+            console.log('Hai cliccato sul pulsante Delete con ID del progetto:', id);
+            deleteTesto(id)
+            .then(() => {
+            location.reload();
+            })
+            .catch((error) => {
+              alert("Errore durante l'eliminazione del testo: " + error);
+            });
+          };
+        });
+
+
+
         adjustTextareaHeight();
   
       });
@@ -261,10 +306,9 @@ function adjustTextareaHeight() {
 
 
 aggiungiBtn.onclick = () => {
-  insertNewText(testoBtn.value, idProgetto, datiProgetto.nomeArtista).then((result) => {
+  insertNewText("Nuovo Testo....", idProgetto, datiProgetto.nomeArtista).then((result) => {
     console.log(result);
     render(idProgetto);
-    testoBtn.value = "";
   })
 }
 

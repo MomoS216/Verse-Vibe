@@ -220,6 +220,8 @@ function renderPrimario() {
           });
         };
       });
+
+      
     } else {
       divSolo.innerHTML = "Ancora nessun progetto SOLO";
     }
